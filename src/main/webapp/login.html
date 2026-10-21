@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart To-Do List | Login</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #080808;
+            color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 32px;
+            border: 1px solid #292929;
+            border-radius: 18px;
+            background: #111111;
+            box-shadow: 0 20px 60px #00000080;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            text-align: center;
+            font-size: 27px;
+        }
+
+        .subtitle {
+            margin: 0 0 26px;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tabs button {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 9px;
+            background: #191919;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .tabs button.active {
+            background: #f5f5f5;
+            color: #111;
+            border-color: #f5f5f5;
+            font-weight: bold;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 7px;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #333;
+            border-radius: 9px;
+            outline: none;
+            background: #080808;
+            color: white;
+            font-size: 15px;
+        }
+
+        input:focus {
+            border-color: #aaa;
+        }
+
+        .submit {
+            width: 100%;
+            margin-top: 24px;
+            padding: 14px;
+            border: none;
+            border-radius: 9px;
+            background: #f5f5f5;
+            color: #111;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .submit:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        #message {
+            min-height: 20px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .success {
+            color: #7ee2a8;
+        }
+
+        .error {
+            color: #ff8585;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .hint {
+            margin-top: 15px;
+            color: #888;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <h1>Smart To-Do List</h1>
+        <p class="subtitle">Your tasks. Your space.</p>
+
+        <div class="tabs">
+            <button type="button" id="loginTab" class="active">
+                Login
+            </button>
+            <button type="button" id="registerTab">
+                Register
+            </button>
+        </div>
+
+        <form id="authForm">
+            <div id="usernameGroup" class="hidden">
+                <label for="username">Username</label>
+                <input id="username" name="username"
+                       maxlength="100" autocomplete="username">
+            </div>
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email"
+                   maxlength="255" required autocomplete="email">
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password"
+                   minlength="8" maxlength="128" required
+                   autocomplete="current-password">
+
+            <button class="submit" id="submitButton" type="submit">
+                Login
+            </button>
+        </form>
+
+        <p id="message" role="status" aria-live="polite"></p>
+
+        <p class="hint">
+            Register for a new account or log in to access your personal tasks.
+        </p>
+    </main>
+
+    <script>
+        const form = document.getElementById("authForm");
+        const loginTab = document.getElementById("loginTab");
+        const registerTab = document.getElementById("registerTab");
+        const usernameGroup = document.getElementById("usernameGroup");
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const submitButton = document.getElementById("submitButton");
+        const message = document.getElementById("message");
+
+        let mode = "login";
+
+        function setMode(nextMode) {
+            mode = nextMode;
+
+            const registering = mode === "register";
+
+            loginTab.classList.toggle("active", !registering);
+            registerTab.classList.toggle("active", registering);
+            usernameGroup.classList.toggle("hidden", !registering);
+            username.required = registering;
+
+            submitButton.textContent =
+                registering ? "Create Account" : "Login";
+
+            password.autocomplete =
+                registering ? "new-password" : "current-password";
+
+            message.textContent = "";
+            message.className = "";
+        }
+
+        loginTab.addEventListener("click", () => setMode("login"));
+        registerTab.addEventListener("click", () => setMode("register"));
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            message.textContent = "";
+            message.className = "";
+            submitButton.disabled = true;
+
+            const data = new URLSearchParams();
+            data.set("email", document.getElementById("email").value);
+            data.set("password", password.value);
+
+            if (mode === "register") {
+                data.set("username", username.value);
+            }
+
+            try {
+                const response = await fetch(
+                    "auth/" + mode,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/x-www-form-urlencoded;charset=UTF-8"
+                        },
+                        body: data,
+                        credentials: "same-origin"
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    message.textContent =
+                        result.message || "Something went wrong.";
+                    message.className = "error";
+                    return;
+                }
+
+                message.textContent = result.message;
+                message.className = "success";
+
+                window.location.href = "./";
+            } catch (error) {
+                message.textContent =
+                    "Cannot connect to the server. Please try again.";
+                message.className = "error";
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
