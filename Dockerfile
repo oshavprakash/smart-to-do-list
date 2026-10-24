@@ -7,6 +7,8 @@ COPY pom.xml .
 COPY src ./src
 
 RUN mvn -B clean package -DskipTests
+RUN jar tf /app/target/SmartTodoList.war | grep "WEB-INF/lib/mysql-connector-j"
+
 
 FROM tomcat:11.0-jdk21-temurin
 
