@@ -103,8 +103,8 @@ protected void doGet(HttpServletRequest request,
                         "A database error occurred.");
             }
         } catch (Exception e) {
-            getServletContext().log(
-                    "Authentication error", e);
+            System.err.println("========== AUTHENTICATION DATABASE ERROR ==========");
+                e.printStackTrace(System.err);
 
             if (!response.isCommitted()) {
                 response.setStatus(
