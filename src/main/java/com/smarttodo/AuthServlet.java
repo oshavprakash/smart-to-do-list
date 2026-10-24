@@ -1,6 +1,4 @@
-
 package com.smarttodo;
-
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -82,20 +80,17 @@ protected void doGet(HttpServletRequest request,
                 case "/auth/login":
                     login(request, response);
                     break;
-
                 case "/auth/logout":
                     logout(request, response);
                     break;
-
                 default:
                     response.setStatus(
                             HttpServletResponse.SC_NOT_FOUND);
                     sendJson(response, false, "Endpoint not found.");
             }
         } catch (SQLException e) {
-            getServletContext().log(
-                    "Authentication database error", e);
-
+                System.err.println("========== AUTHENTICATION DATABASE ERROR ==========");
+                e.printStackTrace(System.err);
             if (!response.isCommitted()) {
                 response.setStatus(
                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -105,7 +100,6 @@ protected void doGet(HttpServletRequest request,
         } catch (Exception e) {
             System.err.println("========== AUTHENTICATION DATABASE ERROR ==========");
                 e.printStackTrace(System.err);
-
             if (!response.isCommitted()) {
                 response.setStatus(
                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -114,16 +108,13 @@ protected void doGet(HttpServletRequest request,
             }
         }
     }
-
     private void register(HttpServletRequest request,
                          HttpServletResponse response)
             throws Exception {
-
         String username = trim(request.getParameter("username"));
         String email = trim(request.getParameter("email"))
                 .toLowerCase(java.util.Locale.ROOT);
         String password = request.getParameter("password");
-
         if (username == null || username.isBlank()
                 || email == null || email.isBlank()
                 || password == null || password.isBlank()) {
@@ -133,7 +124,6 @@ protected void doGet(HttpServletRequest request,
                     "All fields are required.");
             return;
         }
-
         if (username.length() > 100
                 || email.length() > 255
                 || !email.matches(
